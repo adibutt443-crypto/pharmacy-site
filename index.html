@@ -130,5 +130,13 @@ footer b{color:var(--tx);letter-spacing:.5px}
   <div>WhatsApp: <a href="https://wa.me/923167633140">+92 316 7633140</a></div>
 </footer>
   <a class="wa-float" href="https://wa.me/923167633140" target="_blank" rel="noopener">💬 WhatsApp</a>
+  <script>
+(function(){
+  var els=document.querySelectorAll('.reveal,#pricecard');
+  if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});return}
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.15});
+  els.forEach(function(e){io.observe(e)});
+})();
+</script>
 </body>
 </html>
