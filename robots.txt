@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://adibutt443-crypto.github.io/pharmacy-site/sitemap.xml
