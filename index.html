@@ -101,6 +101,12 @@ footer b{color:var(--tx);letter-spacing:.5px}
 .wlist li{margin:10px 0;padding-left:30px;position:relative;font-size:16px}
 .wlist li::before{content:"✓";position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:#ffb703;color:#4a3200;display:grid;place-items:center;font-weight:900;font-size:13px}
 .wnext{background:linear-gradient(135deg,#ffb703,#ffd166);color:#4a3200;font-weight:800;font-size:18px;border:0;border-radius:14px;padding:15px 40px;min-height:52px;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+.plans{display:grid;gap:18px;max-width:440px;margin:0 auto}
+.plans .price-card{max-width:none;width:100%;margin:0}
+.plans .price{font-size:38px}
+.price-card.best{box-shadow:0 12px 30px rgba(255,183,3,.35)}
+@media(min-width:900px){.plans{grid-template-columns:repeat(3,1fr);max-width:980px}}
+  #pricecard{display:none}
 </style> 
 </head>
 <body>
@@ -150,6 +156,51 @@ footer b{color:var(--tx);letter-spacing:.5px}
   <section id="buy">
     <h2 style="text-align:center">Get Pharmacy.POS</h2>
     <p class="sub" style="text-align:center">One payment. Lifetime use on your store phone.</p>
+    <div class="plans">
+
+  <div class="price-card reveal">
+    <span class="tag">3 Months</span>
+    <div class="price">Rs 5,000</div>
+    <div class="once">Valid for 3 months</div>
+    <ul class="ticks">
+      <li>Fast billing &amp; barcode scan</li>
+      <li>Stock, expiry &amp; low-stock alerts</li>
+      <li>Udhaar &amp; profit reports</li>
+      <li>Works fully offline</li>
+      <li>Setup help on WhatsApp</li>
+    </ul>
+    <a class="btn buy" href="https://wa.me/923167633140?text=Hello%2C%20I%20want%20to%20buy%20Pharmacy.POS%203%20Months%20plan%20(Rs%205%2C000)">💳 Buy 3 Months</a>
+  </div>
+
+  <div class="price-card best reveal">
+    <span class="tag">1 Year · Popular</span>
+    <div class="price">Rs 7,000</div>
+    <div class="once">Valid for 1 year</div>
+    <ul class="ticks">
+      <li>Fast billing &amp; barcode scan</li>
+      <li>Stock, expiry &amp; low-stock alerts</li>
+      <li>Udhaar &amp; profit reports</li>
+      <li>Works fully offline</li>
+      <li>Setup help on WhatsApp</li>
+    </ul>
+    <a class="btn buy" href="https://wa.me/923167633140?text=Hello%2C%20I%20want%20to%20buy%20Pharmacy.POS%201%20Year%20plan%20(Rs%207%2C000)">💳 Buy 1 Year</a>
+  </div>
+
+  <div class="price-card reveal">
+    <span class="tag">Lifetime</span>
+    <div class="price">Rs 15,000</div>
+    <div class="once">One-time · No renewal</div>
+    <ul class="ticks">
+      <li>Fast billing &amp; barcode scan</li>
+      <li>Stock, expiry &amp; low-stock alerts</li>
+      <li>Udhaar &amp; profit reports</li>
+      <li>Works fully offline</li>
+      <li>Setup help on WhatsApp</li>
+    </ul>
+    <a class="btn buy" href="https://wa.me/923167633140?text=Hello%2C%20I%20want%20to%20buy%20Pharmacy.POS%20Lifetime%20plan%20(Rs%2015%2C000)">💳 Buy Lifetime</a>
+  </div>
+
+</div>
     <div class="price-card" id="pricecard">
       <span class="tag">Premium licence</span>
       <div class="price">Rs 4,999 <small>one-time</small></div>
