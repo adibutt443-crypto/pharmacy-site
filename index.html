@@ -81,9 +81,18 @@ footer b{color:var(--tx);letter-spacing:.5px}
 .price-card .btn{display:block;width:100%;text-align:center}
 .pay{font-size:13px;color:var(--mu);margin-top:12px}
 @media(max-width:520px){.actions{flex-direction:column;align-items:stretch;padding:0 6px}.actions .btn{width:100%}}
+.welcome{position:fixed;inset:0;z-index:100;overflow-y:auto;background:linear-gradient(135deg,#073b4c,#0e7c86);color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;transition:opacity .5s,transform .5s}
+.welcome.hide{opacity:0;transform:scale(1.05);pointer-events:none}
+.wbox{max-width:420px}
+.welcome h1{font-size:clamp(26px,7vw,38px);margin:0 0 6px}
+.welcome p{opacity:.92;margin:0 0 18px}
+.wphone{width:min(230px,60vw);margin:0 auto 22px;border:7px solid #0b1f26;border-radius:28px;overflow:hidden;background:#000;box-shadow:0 12px 30px rgba(0,0,0,.4)}
+.wphone video{display:block;width:100%;height:auto;max-height:46vh;object-fit:cover}
+.wnext{background:linear-gradient(135deg,#ffb703,#ffd166);color:#4a3200;font-weight:800;font-size:18px;border:0;border-radius:14px;padding:15px 40px;min-height:52px;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.25)}
 </style>
 </head>
 <body>
+  <div id="welcome" class="welcome"><div class="wbox"><h1>Welcome to pharmacy.pos</h1><p>Watch the live demo of the app</p><div class="wphone"><video src="demo1.mp4" autoplay muted loop playsinline preload="metadata"></video></div><button class="wnext" onclick="var w=document.getElementById('welcome');w.classList.add('hide');setTimeout(function(){w.style.display='none'},500)">Next →</button></div></div>
 <header>
   <div class="wrap">
     <div class="top">
