@@ -2,22 +2,78 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Buy App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0f172a;--card:#1e293b;--tx:#f1f5f9;--mut:#94a3b8;--ac:#22c55e}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--tx);padding:16px}
-.c{max-width:460px;margin:auto;background:var(--card);border-radius:16px;padding:20px}
-h2{margin:0 0 4px}.m{color:var(--mut);font-size:14px}
-.bank{background:#0f172a;border:1px dashed var(--ac);border-radius:12px;padding:14px;margin:14px 0;line-height:1.8}
-.bank b{color:var(--ac)}
-select,input{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:1px solid #334155;background:#0f172a;color:var(--tx);font-size:16px}
-button{width:100%;padding:14px;border:0;border-radius:10px;background:var(--ac);color:#04210f;font-size:17px;font-weight:700;margin-top:10px}
-button:disabled{opacity:.5}img{max-width:100%;border-radius:10px;margin-top:8px}
-.box{text-align:center;padding:10px}.key{font-size:24px;letter-spacing:2px;background:#0f172a;padding:14px;border-radius:10px;user-select:all}
-a.dl{display:block;background:var(--ac);color:#04210f;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;margin-top:12px;text-align:center}
-.ord{background:#0f172a;border-radius:12px;padding:12px;margin:10px 0}
+:root{--bg:#0f172a;--card:#1e293b;--deep:#0b1220;--tx:#f1f5f9;--mut:#94a3b8;--ac:#22c55e;--line:#334155}
+*{box-sizing:border-box}
+body{margin:0;font-family:Nunito,ui-rounded,system-ui,sans-serif;color:var(--tx);padding:16px;min-height:100vh;
+background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cpath d='M36 29v14M29 36h14' stroke='%2322c55e' stroke-opacity='.13' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E"),
+radial-gradient(520px 340px at 85% -5%,#22c55e33,transparent 70%),radial-gradient(480px 360px at 0% 40%,#0ea5e922,transparent 70%),radial-gradient(500px 300px at 90% 100%,#22c55e1f,transparent 70%),linear-gradient(180deg,#0b1220,#0f172a 45%,#0a1a1a);background-attachment:fixed}
+.hero{max-width:460px;margin:18px auto 16px;text-align:center}
+.hero .badge{display:inline-grid;place-items:center;width:64px;height:64px;border-radius:20px;font-size:32px;background:linear-gradient(135deg,#22c55e,#0ea5e9);box-shadow:0 10px 30px #22c55e55}
+.hero h1{margin:12px 0 4px;font-size:30px;font-weight:800;letter-spacing:-.5px}
+.hero p{margin:0;color:var(--mut);font-size:15px}
+.chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.chips span{font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;background:#ffffff0d;border:1px solid #ffffff1f;color:#cbd5e1}
+.c{max-width:460px;margin:auto;background:#1e293bd9;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid #475569aa;border-radius:22px;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.45),0 0 0 1px #22c55e14}
+.foot{max-width:460px;margin:16px auto 8px;text-align:center;color:#64748b;font-size:13px}
+.hd{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.lg{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:24px;background:var(--ac);flex:none}
+h2{margin:0 0 2px;font-size:24px;font-weight:800}
+.m{color:var(--mut);font-size:14px}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.pc{width:auto;margin:0;padding:14px 4px;border-radius:14px;background:var(--deep);color:var(--tx);font-family:inherit;font-size:15px;font-weight:800;display:flex;flex-direction:column;gap:4px;align-items:center;border:2px solid var(--line)}
+.pc span{font-size:13px;font-weight:700;color:var(--mut)}
+.pc.on{border-color:var(--ac);background:#12281c}
+.pc.on span{color:var(--ac)}
+.price{margin-top:6px;font-size:15px}.price b{color:var(--ac);font-size:20px}
+.bank{background:var(--deep);border:1px dashed var(--ac);border-radius:14px;padding:14px;margin:14px 0;line-height:1.8}
+.bank b{color:var(--ac);word-break:break-all}
+select,input{width:100%;padding:12px;margin:6px 0;border-radius:12px;border:1px solid var(--line);background:var(--deep);color:var(--tx);font-size:16px;font-family:inherit}
+input:focus{border-color:var(--ac)}
+input[type=file]{border-style:dashed}
+button,a.dl{font-family:inherit}
+button{width:100%;padding:14px;border:0;border-radius:12px;background:var(--ac);color:#04210f;font-size:17px;font-weight:800;margin-top:10px;cursor:pointer}
+button:disabled{opacity:.5}img{max-width:100%;border-radius:12px;margin-top:8px}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.box{text-align:center;padding:10px}.key{font-size:24px;letter-spacing:2px;background:var(--deep);padding:14px;border-radius:12px;user-select:all}
+a.dl{display:block;background:var(--ac);color:#04210f;padding:14px;border-radius:12px;font-weight:800;text-decoration:none;margin-top:12px;text-align:center}
+.ord{background:var(--deep);border-radius:14px;padding:14px;margin:12px 0;border-left:5px solid #f59e0b}
+.ord.s-approved{border-left-color:#22c55e}.ord.s-rejected{border-left-color:#ef4444}
 .ord a.dl{padding:10px;font-size:15px;margin-top:8px}
-.ord button{padding:10px;font-size:15px;background:#334155;color:#f1f5f9}
-</style></head><body><div class="c" id="app"></div>
+.ord button{padding:10px;font-size:15px;background:var(--line);color:var(--tx)}
+.st-approved{color:#22c55e!important;font-weight:700}.st-rejected{color:#f87171!important;font-weight:700}.st-pending{color:#fbbf24!important;font-weight:700}
+#more{background:var(--line);color:var(--tx)}
+/* compact sizing so everything fits a phone screen */
+body{padding:10px}
+.hero{margin:6px auto 10px}
+.hero .badge{width:42px;height:42px;border-radius:14px;font-size:22px}
+.hero h1{margin:6px 0 2px;font-size:21px}
+.hero p{font-size:13px}
+.chips{gap:6px;margin-top:8px}
+.chips span{font-size:11px;padding:4px 9px}
+.c{padding:14px;border-radius:18px}
+.hd{margin-bottom:6px;gap:10px}
+.lg{width:36px;height:36px;border-radius:11px;font-size:19px}
+h2{font-size:19px}
+.m{font-size:12.5px}
+.plans{gap:6px;margin:6px 0}
+.pc{padding:9px 2px;font-size:13px;border-radius:12px}
+.pc span{font-size:12px}
+.price{margin-top:2px;font-size:13px}.price b{font-size:17px}
+.bank{padding:9px 12px;margin:8px 0;line-height:1.45;font-size:13px;border-radius:12px}
+select,input{padding:9px 11px;margin:4px 0;font-size:15px;border-radius:10px}
+button{padding:11px;font-size:15px;margin-top:8px;border-radius:10px}
+a.dl{padding:11px;font-size:15px}
+img{max-height:120px;width:auto}
+.ord{padding:10px;margin:8px 0}
+.ord a.dl,.ord button{padding:8px;font-size:14px}
+.foot{display:none}
+</style></head><body>
+<div class="hero"><div class="badge">💊</div><h1>Get the App</h1><p>Pick a plan, pay, and get approved fast</p>
+<div class="chips"><span>🔒 Safe payment</span><span>⚡ Quick approval</span><span>💬 WhatsApp support</span></div></div>
+<div class="c" id="app"></div>
+<div class="foot">Need help? Tap “Contact on WhatsApp” on your order.</div>
 <script>
 // ===== EDIT YOUR DETAILS HERE =====
 const BANK={title:"United Bank Limited (UBL)",name:"ABDUL AHAD DAR",number:"PK41UNIL0109000331592029"};
@@ -33,7 +89,10 @@ let ids=[];try{ids=JSON.parse(localStorage.getItem("orderIds")||"[]")}catch(e){}
 try{const old=localStorage.getItem("orderId");if(old){if(!ids.includes(old))ids.push(old);localStorage.removeItem("orderId")}}catch(e){}
 const save=()=>{try{localStorage.setItem("orderIds",JSON.stringify(ids))}catch(e){}};save();
 
-function buyForm(){view++;shot="";app.innerHTML=`<h2>Buy the App</h2><div class="m">Select your plan</div><select id="pl">${Object.keys(PLANS).map(k=>`<option value="${k}">${PLANS[k].label}</option>`).join("")}</select><div class="m" style="margin-top:8px">Amount to pay: <b id="pr"></b></div>
+function buyForm(){view++;shot="";app.innerHTML=`<div class="hd"><div class="lg">💊</div><div><h2>Buy the App</h2><div class="m">Select your plan</div></div></div>
+<select id="pl" hidden>${Object.keys(PLANS).map(k=>`<option value="${k}">${PLANS[k].label}</option>`).join("")}</select>
+<div class="plans">${Object.keys(PLANS).map(k=>`<button type="button" class="pc p-${k}" data-k="${k}">${PLANS[k].label}<span>Rs ${PLANS[k].price.toLocaleString()}</span></button>`).join("")}</div>
+<div class="price">Amount to pay: <b id="pr"></b></div>
 <div class="bank"><div>${BANK.title}</div><div>Name: <b>${BANK.name}</b></div><div>IBAN: <b>${BANK.number}</b></div></div>
 <div class="m">After sending the payment, enter your details and upload the screenshot below.</div>
 <input id="n" placeholder="Your name"><input id="p" type="tel" placeholder="Phone number">
@@ -42,9 +101,11 @@ function buyForm(){view++;shot="";app.innerHTML=`<h2>Buy the App</h2><div class=
 <button id="go">Submit screenshot</button><div id="e" class="m" style="color:#f87171"></div>
 ${ids.length?'<button id="bk" style="background:#334155;color:#f1f5f9">← Back to my orders</button>':""}`;
 $("f").onchange=async e=>{const f=e.target.files[0];if(!f)return;shot=await small(f);$("pv").src=shot;$("pv").hidden=false};
+document.querySelectorAll(".pc").forEach(b=>b.onclick=()=>{$("pl").value=b.dataset.k;showPrice()});
 $("go").onclick=send;if($("bk"))$("bk").onclick=home;
 const q=new URLSearchParams(location.search).get("plan");if(PLANS[q])$("pl").value=q;$("pl").onchange=showPrice;showPrice()}
-function showPrice(){$("pr").textContent="Rs. "+PLANS[$("pl").value].price.toLocaleString()}
+function showPrice(){const k=$("pl").value;$("pr").textContent="Rs. "+PLANS[k].price.toLocaleString();
+document.querySelectorAll(".pc").forEach(b=>b.classList.toggle("on",b.dataset.k===k))}
 function small(file){return new Promise(r=>{const i=new Image();i.onload=()=>{let w=Math.min(900,i.width),q=.7,d;const c=document.createElement("canvas");
 do{c.width=w;c.height=i.height*w/i.width;c.getContext("2d").drawImage(i,0,0,c.width,c.height);d=c.toDataURL("image/jpeg",q);q-=.1;w*=.9}while(d.length>350000&&q>.2);r(d)};i.src=URL.createObjectURL(file)})}
 async function send(){const n=$("n").value.trim(),p=$("p").value.trim(),t=$("t").value.trim();
@@ -55,13 +116,13 @@ if(!r.ok)throw 0;ids.push(id);save();home()}catch(x){$("e").textContent="Failed 
 
 // Orders page: shows every order with its status. The "Buy another plan" button is ALWAYS visible.
 function home(){const v=++view;if(!ids.length){buyForm();return}
-app.innerHTML=`<h2>Your orders</h2><div class="m">Want another plan? You can pay again any time, even while an earlier payment is waiting for approval.</div><div id="list"></div><button id="more">➕ Buy another plan</button><div class="m" style="margin-top:12px;text-align:center">Keep this page open or come back later to check your orders.</div>`;
+app.innerHTML=`<div class="hd"><div class="lg">🧾</div><div><h2>Your orders</h2><div class="m">Pay for another plan any time, even while an earlier payment is waiting.</div></div></div><div id="list"></div><button id="more">➕ Buy another plan</button><div class="m" style="margin-top:12px;text-align:center">Keep this page open or come back later to check your orders.</div>`;
 $("more").onclick=buyForm;
 $("list").onclick=e=>{const b=e.target.closest("[data-dis]");if(!b)return;ids=ids.filter(x=>x!==b.dataset.dis);save();home()};
 const info={};
 const draw=()=>{$("list").innerHTML=ids.map(id=>{const o=info[id]||{},s=o.s||"pending";
 let st=s==="approved"?"✅ Approved":s==="rejected"?"❌ Payment not received — please submit again":"⏳ Waiting for approval";
-let h=`<div class="ord"><b>${esc(o.plan||"Order")}</b>${o.price?" · Rs "+esc(o.price):""}<div class="m">${st}</div>`;
+let h=`<div class="ord s-${s}"><b>${esc(o.plan||"Order")}</b>${o.price?" · Rs "+esc(o.price):""}<div class="m st-${s}">${st}</div>`;
 if(s==="rejected")h+=`<button data-dis="${esc(id)}">Remove</button>`;
 else{const msg=s==="approved"?"Hello, my payment is approved ✅\nName: "+(o.name||"")+"\nPlan: "+(o.plan||"")+"\nPlease send me the app link.":"Hello, I have sent the payment ✅\nName: "+(o.name||"")+"\nPlan: "+(o.plan||"")+" (Rs "+(o.price||"")+")\nTXN: "+(o.txid||"")+"\nPlease check the admin app.";
 h+=`<a class="dl" style="background:#25d366;color:#fff" target="_blank" rel="noopener" href="${wa(msg)}">💬 Contact on WhatsApp</a>`}
