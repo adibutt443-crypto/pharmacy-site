@@ -19,7 +19,6 @@ a.dl{display:block;background:var(--ac);color:#04210f;padding:14px;border-radius
 // ===== EDIT YOUR DETAILS HERE =====
 const BANK={title:"United Bank Limited (UBL)",name:"ABDUL AHAD DAR",number:"PK41UNIL0109000331592029"};
 const PLANS={"3m":{label:"3 Months",price:5000},"1y":{label:"1 Year",price:7000},"life":{label:"Lifetime",price:15000}};
-const DOWNLOAD_URL=""; // link shown to the customer after approval (leave empty to show only the license key)
 const DB="https://pharmacy-74e1f-default-rtdb.firebaseio.com";
 // =====================================
 const $=id=>document.getElementById(id),app=$("app");let shot="";
@@ -43,7 +42,7 @@ try{const r=await fetch(`${DB}/orders/${id}.json`,{method:"PUT",body:JSON.string
 if(!r.ok)throw 0;localStorage.setItem("orderId",id);wait(id)}catch(x){$("e").textContent="Failed to send. Please try again.";$("go").disabled=false}}
 function wait(id){app.innerHTML=`<div class="box"><h2>Please wait ⏳</h2><div class="m">Your payment is being verified. Keep this page open or come back later.</div></div>`;
 const tick=async()=>{try{const a=await (await fetch(`${DB}/approvals/${id}.json`)).json();
-if(a&&a.license){app.innerHTML=`<div class="box"><h2>Payment approved ✅</h2><div class="m">Your License Key:</div><div class="key">${a.license}</div>${DOWNLOAD_URL?`<a class="dl" href="${DOWNLOAD_URL}">Open / Download the app</a>`:""}<div class="m" style="margin-top:12px">Please keep this key safe.</div></div>`;return}
+if(a&&a.license){let od={};try{od=await (await fetch(`${DB}/orders/${id}.json`)).json()||{}}catch(e){}const wm=encodeURIComponent("Hello, my payment is approved ✅\nName: "+(od.name||"")+"\nPlan: "+(od.plan||"")+"\nLicense Key: "+a.license+"\nPlease send me the app.");app.innerHTML=`<div class="box"><h2>Payment approved ✅</h2><div class="m">Your License Key:</div><div class="key">${a.license}</div>${a.link?`<a class="dl" href="${a.link}">Open / Download the app</a>`:""}<a class="dl" style="background:#25d366;color:#fff" href="https://wa.me/923167633140?text=${wm}" target="_blank" rel="noopener">💬 Contact on WhatsApp</a><div class="m" style="margin-top:12px">Please keep this key safe.</div></div>`;return}
 if(a&&a.rejected){localStorage.removeItem("orderId");app.innerHTML=`<div class="box"><h2>Payment not received ❌</h2><div class="m">Please check and submit again.</div><button onclick="buyForm()">Try again</button></div>`;return}}catch(e){}
 setTimeout(tick,5000)};tick()}
 oid?wait(oid):buyForm();
