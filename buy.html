@@ -13,25 +13,37 @@ select,input{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:1px 
 button{width:100%;padding:14px;border:0;border-radius:10px;background:var(--ac);color:#04210f;font-size:17px;font-weight:700;margin-top:10px}
 button:disabled{opacity:.5}img{max-width:100%;border-radius:10px;margin-top:8px}
 .box{text-align:center;padding:10px}.key{font-size:24px;letter-spacing:2px;background:#0f172a;padding:14px;border-radius:10px;user-select:all}
-a.dl{display:block;background:var(--ac);color:#04210f;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;margin-top:12px}
+a.dl{display:block;background:var(--ac);color:#04210f;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;margin-top:12px;text-align:center}
+.ord{background:#0f172a;border-radius:12px;padding:12px;margin:10px 0}
+.ord a.dl{padding:10px;font-size:15px;margin-top:8px}
+.ord button{padding:10px;font-size:15px;background:#334155;color:#f1f5f9}
 </style></head><body><div class="c" id="app"></div>
 <script>
 // ===== EDIT YOUR DETAILS HERE =====
 const BANK={title:"United Bank Limited (UBL)",name:"ABDUL AHAD DAR",number:"PK41UNIL0109000331592029"};
 const PLANS={"3m":{label:"3 Months",price:5000},"1y":{label:"1 Year",price:7000},"life":{label:"Lifetime",price:15000}};
 const DB="https://pharmacy-74e1f-default-rtdb.firebaseio.com";
+const WA="923167633140";
 // =====================================
-const $=id=>document.getElementById(id),app=$("app");let shot="";
-const oid=localStorage.getItem("orderId");
-function buyForm(){app.innerHTML=`<h2>Buy the App</h2><div class="m">Select your plan</div><select id="pl">${Object.keys(PLANS).map(k=>`<option value="${k}">${PLANS[k].label}</option>`).join("")}</select><div class="m" style="margin-top:8px">Amount to pay: <b id="pr"></b></div>
+const $=id=>document.getElementById(id),app=$("app");let shot="",view=0;
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const wa=t=>"https://wa.me/"+WA+"?text="+encodeURIComponent(t);
+// all orders of this device (a person can have many)
+let ids=[];try{ids=JSON.parse(localStorage.getItem("orderIds")||"[]")}catch(e){}
+try{const old=localStorage.getItem("orderId");if(old){if(!ids.includes(old))ids.push(old);localStorage.removeItem("orderId")}}catch(e){}
+const save=()=>{try{localStorage.setItem("orderIds",JSON.stringify(ids))}catch(e){}};save();
+
+function buyForm(){view++;shot="";app.innerHTML=`<h2>Buy the App</h2><div class="m">Select your plan</div><select id="pl">${Object.keys(PLANS).map(k=>`<option value="${k}">${PLANS[k].label}</option>`).join("")}</select><div class="m" style="margin-top:8px">Amount to pay: <b id="pr"></b></div>
 <div class="bank"><div>${BANK.title}</div><div>Name: <b>${BANK.name}</b></div><div>IBAN: <b>${BANK.number}</b></div></div>
 <div class="m">After sending the payment, enter your details and upload the screenshot below.</div>
 <input id="n" placeholder="Your name"><input id="p" type="tel" placeholder="Phone number">
 <input id="t" placeholder="Transaction ID">
 <input id="f" type="file" accept="image/*"><img id="pv" hidden>
-<button id="go">Submit screenshot</button><div id="e" class="m" style="color:#f87171"></div>`;
+<button id="go">Submit screenshot</button><div id="e" class="m" style="color:#f87171"></div>
+${ids.length?'<button id="bk" style="background:#334155;color:#f1f5f9">← Back to my orders</button>':""}`;
 $("f").onchange=async e=>{const f=e.target.files[0];if(!f)return;shot=await small(f);$("pv").src=shot;$("pv").hidden=false};
-$("go").onclick=send;const q=new URLSearchParams(location.search).get("plan");if(PLANS[q])$("pl").value=q;$("pl").onchange=showPrice;showPrice()}
+$("go").onclick=send;if($("bk"))$("bk").onclick=home;
+const q=new URLSearchParams(location.search).get("plan");if(PLANS[q])$("pl").value=q;$("pl").onchange=showPrice;showPrice()}
 function showPrice(){$("pr").textContent="Rs. "+PLANS[$("pl").value].price.toLocaleString()}
 function small(file){return new Promise(r=>{const i=new Image();i.onload=()=>{let w=Math.min(900,i.width),q=.7,d;const c=document.createElement("canvas");
 do{c.width=w;c.height=i.height*w/i.width;c.getContext("2d").drawImage(i,0,0,c.width,c.height);d=c.toDataURL("image/jpeg",q);q-=.1;w*=.9}while(d.length>350000&&q>.2);r(d)};i.src=URL.createObjectURL(file)})}
@@ -39,12 +51,28 @@ async function send(){const n=$("n").value.trim(),p=$("p").value.trim(),t=$("t")
 if(!n||!p||!t||!shot){$("e").textContent="Please fill in everything and attach the screenshot.";return}
 $("go").disabled=true;const id=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 try{const r=await fetch(`${DB}/orders/${id}.json`,{method:"PUT",body:JSON.stringify({name:n,phone:p,txid:t,screenshot:shot,plan:PLANS[$("pl").value].label,price:PLANS[$("pl").value].price,status:"pending",time:Date.now()})});
-if(!r.ok)throw 0;localStorage.setItem("orderId",id);wait(id)}catch(x){$("e").textContent="Failed to send. Please try again.";$("go").disabled=false}}
-function wait(id){app.innerHTML=`<div class="box"><h2>Please wait ⏳</h2><div class="m">Your payment screenshot has been received. Tap the button below to let us know on WhatsApp, so we can check it quickly.</div><a class="dl" id="wab" style="background:#25d366;color:#fff" target="_blank" rel="noopener" href="https://wa.me/923167633140?text=${encodeURIComponent("Hello, I have sent the payment. Please check the admin app.")}">💬 Contact on WhatsApp</a><div class="m" style="margin-top:12px">Keep this page open or come back later to get your license key.</div></div>`;
-fetch(`${DB}/orders/${id}.json`).then(r=>r.json()).then(od=>{const w=document.getElementById("wab");if(od&&w)w.href="https://wa.me/923167633140?text="+encodeURIComponent("Hello, I have sent the payment ✅\nName: "+od.name+"\nPlan: "+od.plan+" (Rs "+od.price+")\nTXN: "+od.txid+"\nPlease check the admin app.")}).catch(()=>{});
-const tick=async()=>{try{const a=await (await fetch(`${DB}/approvals/${id}.json`)).json();
-if(a&&(a.approved||a.license)){let od={};try{od=await (await fetch(`${DB}/orders/${id}.json`)).json()||{}}catch(e){}const wm=encodeURIComponent("Hello, my payment is approved ✅\nName: "+(od.name||"")+"\nPlan: "+(od.plan||"")+"\nPlease send me the app link.");app.innerHTML=`<div class="box"><h2>Congratulations! 🎉</h2><div class="m">Your payment is approved.</div><a class="dl" style="background:#25d366;color:#fff" href="https://wa.me/923167633140?text=${wm}" target="_blank" rel="noopener">💬 Contact on WhatsApp</a></div>`;return}
-if(a&&a.rejected){localStorage.removeItem("orderId");app.innerHTML=`<div class="box"><h2>Payment not received ❌</h2><div class="m">Please check and submit again.</div><button onclick="buyForm()">Try again</button></div>`;return}}catch(e){}
-setTimeout(tick,5000)};tick()}
-oid?wait(oid):buyForm();
+if(!r.ok)throw 0;ids.push(id);save();home()}catch(x){$("e").textContent="Failed to send. Please try again.";$("go").disabled=false}}
+
+// Orders page: shows every order with its status. The "Buy another plan" button is ALWAYS visible.
+function home(){const v=++view;if(!ids.length){buyForm();return}
+app.innerHTML=`<h2>Your orders</h2><div class="m">Want another plan? You can pay again any time, even while an earlier payment is waiting for approval.</div><div id="list"></div><button id="more">➕ Buy another plan</button><div class="m" style="margin-top:12px;text-align:center">Keep this page open or come back later to check your orders.</div>`;
+$("more").onclick=buyForm;
+$("list").onclick=e=>{const b=e.target.closest("[data-dis]");if(!b)return;ids=ids.filter(x=>x!==b.dataset.dis);save();home()};
+const info={};
+const draw=()=>{$("list").innerHTML=ids.map(id=>{const o=info[id]||{},s=o.s||"pending";
+let st=s==="approved"?"✅ Approved":s==="rejected"?"❌ Payment not received — please submit again":"⏳ Waiting for approval";
+let h=`<div class="ord"><b>${esc(o.plan||"Order")}</b>${o.price?" · Rs "+esc(o.price):""}<div class="m">${st}</div>`;
+if(s==="rejected")h+=`<button data-dis="${esc(id)}">Remove</button>`;
+else{const msg=s==="approved"?"Hello, my payment is approved ✅\nName: "+(o.name||"")+"\nPlan: "+(o.plan||"")+"\nPlease send me the app link.":"Hello, I have sent the payment ✅\nName: "+(o.name||"")+"\nPlan: "+(o.plan||"")+" (Rs "+(o.price||"")+")\nTXN: "+(o.txid||"")+"\nPlease check the admin app.";
+h+=`<a class="dl" style="background:#25d366;color:#fff" target="_blank" rel="noopener" href="${wa(msg)}">💬 Contact on WhatsApp</a>`}
+return h+"</div>"}).join("")};
+draw();
+const tick=async()=>{if(v!==view)return;
+await Promise.all(ids.map(async id=>{try{const o=info[id]||{};
+if(!o.loaded){const od=await (await fetch(`${DB}/orders/${id}.json`)).json()||{};Object.assign(o,{name:od.name,plan:od.plan,price:od.price,txid:od.txid,loaded:true})}
+if(o.s!=="approved"){const a=await (await fetch(`${DB}/approvals/${id}.json`)).json();
+o.s=a&&(a.approved||a.license)?"approved":a&&a.rejected?"rejected":"pending"}
+info[id]=o}catch(e){}}));
+if(v!==view)return;draw();setTimeout(tick,5000)};tick()}
+home();
 </script></body></html>
