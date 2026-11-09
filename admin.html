@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--tx:#f1f5f9;--mut:#94a3b8;--ac:#22c55e}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--tx);padding:14px}
+.w{max-width:520px;margin:auto}.o{background:var(--card);border-radius:14px;padding:14px;margin:12px 0}
+input{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:1px solid #334155;background:#0f172a;color:var(--tx);font-size:16px}
+button{padding:12px 16px;border:0;border-radius:10px;font-weight:700;font-size:15px}
+.ok{background:var(--ac);color:#04210f}.no{background:#ef4444;color:#fff}.g{background:#334155;color:#fff}
+img{width:100%;border-radius:10px;margin:8px 0}.m{color:var(--mut);font-size:14px}.r{display:flex;gap:8px}.r button{flex:1}
+.st{font-size:12px;padding:2px 8px;border-radius:8px;background:#334155}
+</style></head><body><div class="w" id="app"></div>
+<script>
+const KEY="AIzaSyBXOTDSPp5XE8IHBR75jLwlGnwfM5vjwvg",DB="https://pharmacy-74e1f-default-rtdb.firebaseio.com";
+let tok="",app=document.getElementById("app");
+function login(msg){app.innerHTML=`<h2>Admin Login</h2><input id="e" type="email" placeholder="Email"><input id="p" type="password" placeholder="Password"><button class="ok" style="width:100%" onclick="doLogin()">Login</button><div class="m" style="color:#f87171">${msg||""}</div>`}
+async function doLogin(){const r=await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${KEY}`,{method:"POST",body:JSON.stringify({email:e.value.trim(),password:p.value,returnSecureToken:true})});
+const d=await r.json();if(!d.idToken)return login("Wrong email or password.");tok=d.idToken;load()}
+const u=p=>`${DB}/${p}.json?auth=${tok}`;
+async function load(){app.innerHTML="Loading...";const r=await fetch(u("orders"));if(!r.ok)return login("Session expired, please log in again.");
+const o=(await r.json())||{};const ids=Object.keys(o).sort((a,b)=>o[b].time-o[a].time);
+app.innerHTML=`<div class="r"><h2 style="flex:3;margin:0">Payments</h2><button class="g" onclick="load()">Refresh</button></div>`+
+(ids.length?ids.map(i=>{const x=o[i],pend=x.status=="pending";return `<div class="o"><span class="st">${x.status}</span>
+<h3 style="margin:8px 0 2px">${esc(x.name)}</h3><div class="m">📞 ${esc(x.phone)}<br>TXN: ${esc(x.txid)}<br>${new Date(x.time).toLocaleString()}</div>
+<img src="${x.screenshot||""}">${pend?`<div class="r"><button class="ok" onclick="appr('${i}')">Approve</button><button class="no" onclick="rej('${i}')">Reject</button></div>`:""}</div>`}).join(""):`<div class="m">No requests yet.</div>`)}
+const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function key(){const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";const a=()=>Array.from({length:4},()=>c[Math.floor(Math.random()*c.length)]).join("");return `${a()}-${a()}-${a()}`}
+async function appr(i){if(!confirm("Has the money arrived in your bank? Approve?"))return;
+await fetch(u("approvals/"+i),{method:"PUT",body:JSON.stringify({license:key(),time:Date.now()})});
+await fetch(u("orders/"+i),{method:"PATCH",body:JSON.stringify({status:"approved"})});load()}
+async function rej(i){if(!confirm("Reject this request?"))return;
+await fetch(u("approvals/"+i),{method:"PUT",body:JSON.stringify({rejected:true})});
+await fetch(u("orders/"+i),{method:"PATCH",body:JSON.stringify({status:"rejected"})});load()}
+login();
+</script></body></html>
