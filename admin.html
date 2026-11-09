@@ -17,21 +17,30 @@ const KEY="AIzaSyBXOTDSPp5XE8IHBR75jLwlGnwfM5vjwvg",DB="https://pharmacy-74e1f-d
 let tok="",app=document.getElementById("app");
 function login(msg){app.innerHTML=`<h2>Admin Login</h2><input id="e" type="email" placeholder="Email"><input id="p" type="password" placeholder="Password"><button class="ok" style="width:100%" onclick="doLogin()">Login</button><div class="m" style="color:#f87171">${msg||""}</div>`}
 async function doLogin(){const r=await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${KEY}`,{method:"POST",body:JSON.stringify({email:e.value.trim(),password:p.value,returnSecureToken:true})});
-const d=await r.json();if(!d.idToken)return login("Wrong email or password.");tok=d.idToken;load()}
+const d=await r.json();if(!d.idToken)return login("Wrong email or password.");tok=d.idToken;if(window.Notification&&Notification.permission=="default")Notification.requestPermission();load()}
 const u=p=>`${DB}/${p}.json?auth=${tok}`;
 async function load(){app.innerHTML="Loading...";const r=await fetch(u("orders"));if(!r.ok)return login("Session expired, please log in again.");
-const o=(await r.json())||{};const ids=Object.keys(o).sort((a,b)=>o[b].time-o[a].time);
+const o=(await r.json())||{};const ap=(await (await fetch(u("approvals"))).json())||{};window.O=o;window.AP=ap;const ids=Object.keys(o).sort((a,b)=>o[b].time-o[a].time);
 app.innerHTML=`<div class="r"><h2 style="flex:3;margin:0">Payments</h2><button class="g" onclick="load()">Refresh</button></div>`+
 (ids.length?ids.map(i=>{const x=o[i],pend=x.status=="pending";return `<div class="o"><span class="st">${x.status}</span>
 <h3 style="margin:8px 0 2px">${esc(x.name)}</h3><div class="m">📦 ${esc(x.plan)} — Rs ${esc(x.price)}<br>📞 ${esc(x.phone)}<br>TXN: ${esc(x.txid)}<br>${new Date(x.time).toLocaleString()}</div>
-<img src="${x.screenshot||""}">${pend?`<div class="r"><button class="ok" onclick="appr('${i}')">Approve</button><button class="no" onclick="rej('${i}')">Reject</button></div>`:""}</div>`}).join(""):`<div class="m">No requests yet.</div>`)}
+<img src="${x.screenshot||""}">${pend?`<div class="r"><button class="ok" onclick="appr('${i}')">Approve</button><button class="no" onclick="rej('${i}')">Reject</button></div>`:""}${x.status=="approved"&&ap[i]?`<button class="ok" style="width:100%;margin-top:8px" onclick="wa('${i}')">Send app link on WhatsApp</button>`:""}</div>`}).join(""):`<div class="m">No requests yet.</div>`)}
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function key(){const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";const a=()=>Array.from({length:4},()=>c[Math.floor(Math.random()*c.length)]).join("");return `${a()}-${a()}-${a()}`}
-async function appr(i){if(!confirm("Has the money arrived in your bank? Approve?"))return;const link=prompt("Paste the app link for this customer:",localStorage.getItem("appLink")||"");if(link===null)return;localStorage.setItem("appLink",link.trim());
-await fetch(u("approvals/"+i),{method:"PUT",body:JSON.stringify({license:key(),link:link.trim(),time:Date.now()})});
+async function appr(i){if(!confirm("Has the money arrived in your bank? Approve?"))return;
+await fetch(u("approvals/"+i),{method:"PUT",body:JSON.stringify({approved:true,time:Date.now()})});
 await fetch(u("orders/"+i),{method:"PATCH",body:JSON.stringify({status:"approved"})});load()}
 async function rej(i){if(!confirm("Reject this request?"))return;
 await fetch(u("approvals/"+i),{method:"PUT",body:JSON.stringify({rejected:true})});
 await fetch(u("orders/"+i),{method:"PATCH",body:JSON.stringify({status:"rejected"})});load()}
+let seen=null;
+function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();setTimeout(()=>o.stop(),600)}catch(e){}}
+async function poll(){if(!tok)return;try{const r=await fetch(u("orders"));if(!r.ok)return;const o=(await r.json())||{};const p=Object.keys(o).filter(k=>o[k].status=="pending");
+if(seen!==null&&p.some(k=>!seen.includes(k))){beep();if(window.Notification&&Notification.permission=="granted")new Notification("New payment request");load()}seen=p}catch(e){}}
+setInterval(poll,20000);
+function wa(i){const x=O[i];const link=prompt("Paste the app link to send to this customer:",localStorage.getItem("appLink")||"");if(link===null)return;localStorage.setItem("appLink",link.trim());
+let p=String(x.phone||"").replace(/\D/g,"");if(p.startsWith("0"))p="92"+p.slice(1);
+const m="Assalam o Alaikum "+x.name+", your payment is approved ✅\nHere is your app link: "+link.trim()+"\nAfter installing, tap 'Send your ID' and send it to me on WhatsApp.";
+window.open("https://wa.me/"+p+"?text="+encodeURIComponent(m),"_blank")}
 login();
 </script></body></html>
