@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#073b4c">
+<title>Visitors</title>
+<style>
+  :root{--bg:#f3f6f8;--card:#fff;--ink:#12303b;--mute:#64808c;--brand:#073b4c;--ok:#1a9d5b;--line:#e1e8ec}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:var(--brand);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+  header h1{font-size:17px;margin:0}
+  button{font:inherit;border:0;border-radius:10px;padding:10px 16px;background:var(--brand);color:#fff;cursor:pointer}
+  header button{background:#ffffff22;padding:6px 12px;font-size:13px}
+  #login{max-width:340px;margin:18vh auto;text-align:center;padding:0 16px}
+  #msg{color:#c0392b;font-size:14px}
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:12px 16px}
+  .stat{background:var(--card);border-radius:12px;padding:12px;border:1px solid var(--line)}
+  .stat b{display:block;font-size:22px}
+  .stat span{font-size:12px;color:var(--mute)}
+  .tools{padding:0 16px 8px;display:flex;gap:8px}
+  .tools button{background:var(--card);color:var(--ink);border:1px solid var(--line);padding:7px 12px;font-size:13px}
+  .tools button.on{background:var(--brand);color:#fff}
+  #list{padding:0 16px 40px;display:grid;gap:10px}
+  .v{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+  .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+  .dev{font-weight:700}
+  .live{color:var(--ok);font-size:12px;font-weight:700}
+  .row{font-size:13px;color:var(--mute);margin-top:4px}
+  .row b{color:var(--ink);font-weight:600}
+  .tag{display:inline-block;background:#e8f3f6;color:var(--brand);border-radius:6px;padding:2px 7px;font-size:12px;margin:3px 4px 0 0}
+  .tag.buy{background:#fff1d6;color:#8a5a00}
+  .empty{text-align:center;color:var(--mute);padding:40px 0}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <h2>Pharmacy.POS Visitors</h2>
+  <p>Sirf owner ke liye</p>
+  <button id="signin">Google se login</button>
+  <p id="msg"></p>
+</div>
+
+<div id="app" hidden>
+  <header><h1>Visitors</h1><button id="signout">Logout</button></header>
+  <div class="stats">
+    <div class="stat"><b id="sLive">0</b><span>Abhi live</span></div>
+    <div class="stat"><b id="sToday">0</b><span>Aaj ke visitors</span></div>
+    <div class="stat"><b id="sAvg">0s</b><span>Average time</span></div>
+    <div class="stat"><b id="sBuy">0</b><span>Buy/WhatsApp clicks</span></div>
+  </div>
+  <div class="tools">
+    <button id="fToday" class="on">Aaj</button>
+    <button id="fAll">Sab (latest 300)</button>
+  </div>
+  <div id="list"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+window.FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBXOTDSPp5XE8IHBR75jLwlGnwfM5vjwvg",
+  authDomain: "pharmacy-74e1f.firebaseapp.com",
+  databaseURL: "https://pharmacy-74e1f-default-rtdb.firebaseio.com",
+  projectId: "pharmacy-74e1f",
+  storageBucket: "pharmacy-74e1f.firebasestorage.app",
+  messagingSenderId: "274682059236",
+  appId: "1:274682059236:web:3a66036f92da28cfc84ff1"
+};
+</script>
+<script>
+  var ADMIN_EMAIL = "adibutt443@gmail.com";
+
+  var app = firebase.apps.length ? firebase.app() : firebase.initializeApp(window.FIREBASE_CONFIG);
+  var auth = firebase.auth(), db = firebase.database();
+  var $ = function (id) { return document.getElementById(id); };
+  var docs = [], filter = 'today', q = null;
+
+  $('signin').onclick = function () {
+    var p = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(p).catch(function () { auth.signInWithRedirect(p); });
+  };
+  $('signout').onclick = function () { auth.signOut(); };
+  $('fToday').onclick = function () { filter = 'today'; setBtn(); render(); };
+  $('fAll').onclick = function () { filter = 'all'; setBtn(); render(); };
+  function setBtn() {
+    $('fToday').className = filter === 'today' ? 'on' : '';
+    $('fAll').className = filter === 'all' ? 'on' : '';
+  }
+
+  auth.onAuthStateChanged(function (u) {
+    if (q) { q.off(); q = null; }
+    if (!u) { $('login').hidden = false; $('app').hidden = true; return; }
+    if ((u.email || '').toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+      $('msg').textContent = 'Yeh account allowed nahi hai.';
+      auth.signOut(); return;
+    }
+    try { localStorage.setItem('noTrack', '1'); } catch (e) {}
+    $('login').hidden = true; $('app').hidden = false;
+    q = db.ref('visits').orderByChild('lastSeen').limitToLast(300);
+    q.on('value', function (snap) {
+      var arr = [];
+      snap.forEach(function (c) { arr.push(c.val()); });
+      arr.sort(function (a, b) { return (b.lastSeen || 0) - (a.lastSeen || 0); });
+      docs = arr; render();
+    }, function (err) { $('list').innerHTML = '<div class="empty">Data load nahi hua: ' + esc(err.message) + '</div>'; });
+  });
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fmt(s) { s = s || 0; if (s < 60) return s + 's'; var m = Math.floor(s / 60); return m + 'm ' + (s % 60) + 's'; }
+  function when(t) {
+    if (!t) return '';
+    return new Date(t).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  }
+  function vals(o) { return o ? Object.keys(o).map(function (k) { return o[k]; }) : []; }
+
+  function render() {
+    var now = Date.now(), start = new Date(); start.setHours(0, 0, 0, 0);
+    var today = docs.filter(function (v) { return (v.firstSeen || 0) >= start.getTime(); });
+    var live = docs.filter(function (v) { return now - (v.lastSeen || 0) < 40000; });
+    var buys = today.reduce(function (n, v) { return n + vals(v.clicks).length; }, 0);
+    var avg = today.length ? Math.round(today.reduce(function (n, v) { return n + (v.activeSeconds || 0); }, 0) / today.length) : 0;
+    $('sLive').textContent = live.length;
+    $('sToday').textContent = today.length;
+    $('sAvg').textContent = fmt(avg);
+    $('sBuy').textContent = buys;
+
+    var show = filter === 'today' ? today : docs;
+    if (!show.length) { $('list').innerHTML = '<div class="empty">Abhi koi visit nahi.</div>'; return; }
+    $('list').innerHTML = show.map(function (v) {
+      var isLive = now - (v.lastSeen || 0) < 40000;
+      var place = [v.city, v.region, v.country].filter(Boolean).join(', ') || 'Location unknown';
+      var tags = vals(v.pages).map(function (p) { return '<span class="tag">' + esc(p) + '</span>'; }).join('');
+      var clicks = vals(v.clicks).map(function (c) { return '<span class="tag buy">' + esc(c) + '</span>'; }).join('');
+      return '<div class="v">' +
+        '<div class="top"><div class="dev">' + esc(v.device || 'Unknown') + '</div>' +
+        (isLive ? '<div class="live">● LIVE</div>' : '<div class="row">' + esc(when(v.lastSeen)) + '</div>') + '</div>' +
+        '<div class="row"><b>' + esc(place) + '</b></div>' +
+        '<div class="row">' + esc(v.os) + ' · ' + esc(v.browser) + ' · ' + esc(v.screen) + '</div>' +
+        '<div class="row">Time on site: <b>' + fmt(v.activeSeconds) + '</b> · Aaya: ' + esc(when(v.firstSeen)) + '</div>' +
+        '<div class="row">Kahan se: <b>' + esc(v.ref || 'direct') + '</b>' + (v.network ? ' · ' + esc(v.network) : '') + '</div>' +
+        '<div>' + tags + clicks + '</div></div>';
+    }).join('');
+  }
+  setInterval(function () { if (docs.length) render(); }, 15000);
+</script>
+</body>
+</html>
