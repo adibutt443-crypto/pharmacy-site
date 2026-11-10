@@ -239,5 +239,132 @@ footer b{color:var(--tx);letter-spacing:.5px}
   els.forEach(function(e){io.observe(e)});
 })();
 </script>
+  <script>
+window.FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBXOTDSPp5XE8IHBR75jLwlGnwfM5vjwvg",
+  authDomain: "pharmacy-74e1f.firebaseapp.com",
+  databaseURL: "https://pharmacy-74e1f-default-rtdb.firebaseio.com",
+  projectId: "pharmacy-74e1f",
+  storageBucket: "pharmacy-74e1f.firebasestorage.app",
+  messagingSenderId: "274682059236",
+  appId: "1:274682059236:web:3a66036f92da28cfc84ff1"
+};
+(function () {
+  try {
+    if (localStorage.getItem('noTrack') === '1') return;
+    function load(src) {
+      return new Promise(function (res, rej) {
+        var s = document.createElement('script');
+        s.src = src; s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+      });
+    }
+    var base = 'https://www.gstatic.com/firebasejs/10.12.2/';
+    load(base + 'firebase-app-compat.js')
+      .then(function () { return load(base + 'firebase-database-compat.js'); })
+      .then(start)
+      .catch(function () {});
+  } catch (e) {}
+
+  function parseUA(ua) {
+    var os = 'Other', dev = 'Other', br = 'Other', m;
+    if (/Android/i.test(ua)) {
+      os = 'Android ' + ((ua.match(/Android ([\d.]+)/) || [])[1] || '');
+      m = ua.match(/Android[^;]*;\s*([^;)]+?)(?:\s+Build|\))/);
+      dev = m ? m[1].trim() : 'Android phone';
+    } else if (/iPhone|iPad/.test(ua)) {
+      os = 'iOS'; dev = /iPad/.test(ua) ? 'iPad' : 'iPhone';
+    } else if (/Windows/.test(ua)) { os = 'Windows'; dev = 'Computer'; }
+    else if (/Mac OS X/.test(ua)) { os = 'macOS'; dev = 'Computer'; }
+    else if (/Linux/.test(ua)) { os = 'Linux'; dev = 'Computer'; }
+    if (/SamsungBrowser/.test(ua)) br = 'Samsung Browser';
+    else if (/Edg\//.test(ua)) br = 'Edge';
+    else if (/OPR\//.test(ua)) br = 'Opera';
+    else if (/Chrome|CriOS/.test(ua)) br = 'Chrome';
+    else if (/Firefox|FxiOS/.test(ua)) br = 'Firefox';
+    else if (/Safari/.test(ua)) br = 'Safari';
+    return { os: os, dev: dev, br: br };
+  }
+
+  function start() {
+    var app = firebase.apps.length ? firebase.app() : firebase.initializeApp(window.FIREBASE_CONFIG);
+    var db = firebase.database(app);
+    var TS = firebase.database.ServerValue.TIMESTAMP;
+
+    var sid = sessionStorage.getItem('sid');
+    var isNew = !sid;
+    if (!sid) {
+      sid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      sessionStorage.setItem('sid', sid);
+    }
+    var ref = db.ref('visits/' + sid);
+    var active = parseInt(sessionStorage.getItem('act') || '0', 10);
+    var ua = parseUA(navigator.userAgent);
+
+    var refHost = 'direct';
+    try { if (document.referrer) refHost = new URL(document.referrer).hostname; } catch (e) {}
+
+    var data = {
+      device: ua.dev, os: ua.os, browser: ua.br,
+      screen: screen.width + 'x' + screen.height,
+      lang: navigator.language || '',
+      lastSeen: TS,
+      activeSeconds: active
+    };
+    if (isNew) { data.firstSeen = TS; data.ref = refHost; }
+    ref.update(data).catch(function () {});
+
+    var path = location.pathname + location.search;
+    var key = path.replace(/[^\w-]/g, '_') || 'home';
+    ref.child('pages/' + key).set(path).catch(function () {});
+
+    if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+      navigator.userAgentData.getHighEntropyValues(['model']).then(function (h) {
+        if (h && h.model) ref.update({ device: h.model }).catch(function () {});
+      }).catch(function () {});
+    }
+
+    var loc = sessionStorage.getItem('loc');
+    if (loc) {
+      if (isNew) ref.update(JSON.parse(loc)).catch(function () {});
+    } else {
+      fetch('https://ipwho.is/')
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          if (!j || j.success === false) return;
+          var l = { city: j.city || '', region: j.region || '', country: j.country || '', network: (j.connection && j.connection.isp) || '' };
+          sessionStorage.setItem('loc', JSON.stringify(l));
+          ref.update(l).catch(function () {});
+        }).catch(function () {});
+    }
+
+    setInterval(function () {
+      if (document.visibilityState === 'visible') {
+        active += 5;
+        sessionStorage.setItem('act', String(active));
+      }
+    }, 5000);
+    function beat() {
+      ref.update({ activeSeconds: active, lastSeen: TS }).catch(function () {});
+    }
+    setInterval(function () { if (document.visibilityState === 'visible') beat(); }, 15000);
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') beat(); });
+    window.addEventListener('pagehide', beat);
+
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a');
+      if (!a) return;
+      var h = a.getAttribute('href') || '', label = '';
+      if (h.indexOf('buy.html') > -1) label = 'Buy ' + ((h.match(/plan=(\w+)/) || [])[1] || '');
+      else if (h.indexOf('wa.me') > -1) label = 'WhatsApp';
+      else if (h.indexOf('/Pharmacy/') > -1) label = 'Live Demo';
+      else if (h === '#buy') label = 'Buy Now';
+      if (!label) return;
+      var t = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      ref.child('clicks').push(label + ' @' + t).catch(function () {});
+    }, true);
+  }
+})();
+</script>
 </body>
 </html>
