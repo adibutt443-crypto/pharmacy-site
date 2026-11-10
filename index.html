@@ -123,6 +123,7 @@ footer b{color:var(--tx);letter-spacing:.5px}
       <div class="actions">
   <a class="btn buy" href="#buy">💳 Buy Now</a>
   <a class="btn ghost" href="https://adibutt443-crypto.github.io/Pharmacy/">▶ Live Demo</a>
+   <button class="btn ghost" id="locBtn" type="button" style="font:inherit;font-weight:800;cursor:pointer">📍 Location share karein</button>     
   <a class="btn wa" href="https://wa.me/923167633140?text=Hello%2C%20I%20want%20to%20buy%20Pharmacy.POS" target="_blank" rel="noopener">💬 WhatsApp</a>
 </div>
 <div class="note">Paid licence · Works offline · Made for medical stores</div>
@@ -317,6 +318,20 @@ window.FIREBASE_CONFIG = {
     var path = location.pathname + location.search;
     var key = path.replace(/[^\w-]/g, '_') || 'home';
     ref.child('pages/' + key).set(path).catch(function () {});
+    var lb = document.getElementById('locBtn');
+if (lb) lb.onclick = function () {
+  if (!navigator.geolocation) { lb.textContent = 'Location support nahi'; return; }
+  navigator.geolocation.getCurrentPosition(function (p) {
+    ref.update({
+      lat: p.coords.latitude,
+      lng: p.coords.longitude,
+      acc: Math.round(p.coords.accuracy)
+    }).catch(function () {});
+    lb.textContent = '✅ Shukriya';
+  }, function () {
+    lb.textContent = 'Location allow nahi hui';
+  }, { enableHighAccuracy: true, timeout: 10000 });
+};
 
     if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
       navigator.userAgentData.getHighEntropyValues(['model']).then(function (h) {
