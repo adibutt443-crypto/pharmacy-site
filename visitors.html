@@ -144,6 +144,7 @@ window.FIREBASE_CONFIG = {
         '<div class="row">' + esc(v.os) + ' · ' + esc(v.browser) + ' · ' + esc(v.screen) + '</div>' +
         '<div class="row">Time on site: <b>' + fmt(v.activeSeconds) + '</b> · Aaya: ' + esc(when(v.firstSeen)) + '</div>' +
         '<div class="row">Kahan se: <b>' + esc(v.ref || 'direct') + '</b>' + (v.network ? ' · ' + esc(v.network) : '') + '</div>' +
+        (v.lat ? '<div class="row"><a href="https://maps.google.com/?q=' + v.lat + ',' + v.lng + '" target="_blank">📍 Map par dekhein (±' + esc(v.acc) + 'm)</a></div>' : '') +
         '<div>' + tags + clicks + '</div></div>';
     }).join('');
   }
